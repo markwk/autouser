@@ -1,0 +1,63 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function autouser_menu() {
+  $items['usertesting/test'] = array(
+    'title' => 'Click here to login',
+    'page callback' => '_autouser',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+
+/**
+ * creates a user and logs him in
+ *
+ * @return void
+ **/
+function _autouser(){
+  //set up the user fields
+  $fields = array(
+    'name' => _username(6),
+    'mail' => 'localhost@localdomain',
+    'init' => 'localhost@localdomain',
+    'pass' => user_password(8),
+    'status' => 1,
+    'roles' => array(
+      DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+      // 9 => 'affiliate'
+    ),
+  );
+
+  //the first parameter is left blank so a new user is created
+  $account = user_save('', $fields);
+  $account->status = 1;
+  user_save($account);
+  $form_state['uid'] = $account->uid;
+  // log in the user
+  user_login_submit(array(), $form_state);
+  
+  // redirect to user page
+   drupal_goto('user');
+  // drupal_goto('users/social', array('query' => array('type' => 'supplier')));
+}
+
+
+/**
+ * generates a string
+ *
+ * @param $length
+ *     The length of the output string
+ * @return
+ *     A random string
+ **/
+function _username($length) {
+  $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return substr(str_shuffle($chars),0,$length);
+}
